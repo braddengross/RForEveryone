@@ -1,49 +1,47 @@
 #Part 1
 #Valid values are sulfate, nitrate
-pollutantmean <- function(directory, pollutant, id = 1:332){
-  data_files2 <- list.files(directory)
-  means <- rep(0, length(id))
+pollutantmean <- function(directory = getwd(), pollutant, id = 1:332){
+  options(digits = 4)
+  data_files <- list.files(directory, full.names = TRUE)
+  pollutantReadings <- rep(0, length(id))
+  mean_vector <- c()
   for(i in 1:length(id)){
-    csv = read.csv(data_files2[i])
-    mean <- mean(csv[,pollutant], na.rm = TRUE)
-    if(!is.nan(mean)){means[i] <- mean}
+    csv = read.csv(data_files[id[i]])
+    file_data <- (csv[,pollutant])
+    mean_vector <- c(mean_vector, file_data)
   }
-  mean(means)
+  mean(mean_vector, na.rm = TRUE)
 }
-pollutantmean("/Users/brad/Coursera/RForEveryone/specdata", "sulfate", 1)
+pollutantmean("specdata", "sulfate", 1:10)
 
 #Part 2
-completeCases <- function(directory, id = 1:332) {
-  data_files2 <- list.files(directory)
+complete <- function(directory = getwd(), id = 1:332) {
+  data_files <- list.files(directory, full.names = TRUE)
   m <- matrix(nrow =length(id), ncol=2)
   for(i in 1:length(id)){
-    csv = read.csv(data_files2[i])
+    csv = read.csv(data_files[id[i]])
     completeCases = sum(complete.cases(csv))
-    m[i, 1] <- i
+    m[i, 1] <- id[i]
     m[i, 2] <- completeCases
   }
   df <- data.frame(m)
   colnames(df) <- c("id", "nobs")
   df
 }
-c <- completeCases("/Users/brad/Coursera/RForEveryone/specdata")
+#c <- complete("/Users/brad/Coursera/RForEveryone/specdata")
 
 #Part 3
-correlationAboveThreshold <- function(directory, threshold = 0) {
-  data_files2 <- list.files(directory)
-  vec = numeric(0)
+corr <- function(directory = getwd(), threshold = 0) {
+  options(digits = 4)
+  data_files <- list.files(directory, full.names = TRUE)
+  cc_vect = vector("numeric")
   for(i in 1:332){
-    csv = read.csv(data_files2[i])
+    csv = read.csv(data_files[i])
     completeCases = sum(complete.cases(csv))
     if(completeCases > threshold){
-      print(completeCases)
-      #print(cor(csv$nitrate, csv$sulfate, use="complete.obs"))
       cor <- cor(csv$nitrate, csv$sulfate, use="complete.obs")
-      append(vec, cor)
+      cc_vect <- c(cc_vect, cor)
     }
   }
-  ## Return a numeric vector of correlations
-  vec
+  cc_vect
 }
-v <- correlationAboveThreshold("/Users/brad/Coursera/RForEveryone/specdata", 17)
-
